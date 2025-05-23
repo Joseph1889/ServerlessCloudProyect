@@ -40,3 +40,7 @@ credentials.json
 
 # Archivos comprimidos
 *.zip
+
+
+# Workflow
+.github/
