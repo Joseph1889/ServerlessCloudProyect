@@ -1,0 +1,30 @@
+# Archivos de estado de Terraform
+*.tfstate
+*.tfstate.backup
+
+# Archivos de planes
+*.tfplan
+
+# Archivos de bloqueo
+.terraform.lock.hcl
+
+# Directorio de trabajo de Terraform
+.terraform/
+
+# Archivos de logs o salida
+crash.log
+*.log
+
+# Archivos de override locales
+*.tfvars
+*.tfvars.json
+terraform.tfvars
+
+# Evitar subir archivos de configuración de IDE o del sistema operativo
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Zips
+*.zip
