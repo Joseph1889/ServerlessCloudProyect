@@ -20,11 +20,23 @@ crash.log
 *.tfvars.json
 terraform.tfvars
 
-# Evitar subir archivos de configuración de IDE o del sistema operativo
+# Archivos de configuración de entorno
+.env
+.env.*
+
+# Archivos de claves o certificados
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+credentials.json
+
+# Archivos de configuración de IDE y sistema operativo
 .DS_Store
 .idea/
 .vscode/
 *.swp
 
-# Zips
+# Archivos comprimidos
 *.zip

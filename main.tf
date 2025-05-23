@@ -2,28 +2,10 @@ provider "aws" {
   region = "us-east-1"
 }
 
-/*
-resource "aws_s3_bucket" "ejemplo" {
-  bucket = "mi-bucket-terraform-68654654"
-
-}
-
-resource "aws_s3_bucket_public_access_block" "bloqueo" {
-  bucket = aws_s3_bucket.ejemplo.id
-
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}
-*/
-
-/*
 resource "aws_dynamodb_table" "mi_tabla" {
-  name         = "L2C_20191373"
-  ##billing_mode = "PAY_PER_REQUEST"  # o "PROVISIONED"
 
-  billing_mode = "PROVISIONED"
+  name         = "MiTablaDynamoDB"
+  billing_mode = "PROVISIONED" #billing_mode = "PAY_PER_REQUEST"  # o "PROVISIONED"
 
   read_capacity  = 5
   write_capacity = 5
@@ -40,7 +22,7 @@ resource "aws_dynamodb_table" "mi_tabla" {
     Project     = "MiProyecto"
   }
 }
-*/
+
 
 resource "aws_iam_role" "lambda_exec" {
   name = "lambda_exec_role"
@@ -68,8 +50,18 @@ data "archive_file" "lambda_zip" {
   output_path = "${path.module}/lambda_function.zip"
 }
 
-resource "aws_lambda_function" "mi_lambda" {
-  function_name = "MiLambda"
+resource "aws_lambda_function" "mi_lambda_post" {
+  function_name = "MiLambdaPOST"
+  role          = aws_iam_role.lambda_exec.arn
+  handler       = "handler.handler"
+  runtime       = "nodejs18.x"
+
+  filename         = data.archive_file.lambda_zip.output_path
+  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
+}
+
+resource "aws_lambda_function" "mi_lambda_get" {
+  function_name = "MiLambdaGET"
   role          = aws_iam_role.lambda_exec.arn
   handler       = "handler.handler"
   runtime       = "nodejs18.x"
