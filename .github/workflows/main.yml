@@ -1,0 +1,17 @@
+name: Test workflow
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  print_message:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Check Github action
+        run: echo "Github action is working"
+
