@@ -36,5 +36,7 @@ jobs:
         if: github.ref_name == 'dev' && github.event_name == 'push'
         run: terraform apply -auto-approve
 
-
+      - name: Terraform destroy
+        if: github.ref_name == 'dev' && github.event_name == 'push'
+        run: terraform destroy -auto-approve
       
