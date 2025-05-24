@@ -44,30 +44,36 @@ resource "aws_iam_role_policy_attachment" "lambda_logs" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-data "archive_file" "lambda_zip" {
+data "archive_file_Get" "lambda_zip_Get" {
   type        = "zip"
-  source_dir  = "${path.module}/lambda"
-  output_path = "${path.module}/lambda_function.zip"
+  source_dir  = "${path.module}/lambdaGet"
+  output_path = "${path.module}/lambda_function_Get.zip"
 }
 
-resource "aws_lambda_function" "mi_lambda_post" {
-  function_name = "MiLambdaPOST"
+resource "aws_lambda_function_Get" "mi_lambda_Get" {
+  function_name = "MiLambdaGet"
   role          = aws_iam_role.lambda_exec.arn
   handler       = "handler.handler"
-  runtime       = "nodejs18.x"
+  runtime       = "nodejs22.x"
 
-  filename         = data.archive_file.lambda_zip.output_path
-  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
+  filename         = data.archive_file_Get.lambda_zip_Get.output_path
+  source_code_hash = data.archive_file_Get.lambda_zip_Get.output_base64sha256
 }
 
-resource "aws_lambda_function" "mi_lambda_get" {
-  function_name = "MiLambdaGET"
+data "archive_file_Post" "lambda_zip_Post" {
+  type        = "zip"
+  source_dir  = "${path.module}/lambdaPost"
+  output_path = "${path.module}/lambda_function_Post.zip"
+}
+
+resource "aws_lambda_function_Post" "mi_lambda_get" {
+  function_name = "MiLambdaPost"
   role          = aws_iam_role.lambda_exec.arn
   handler       = "handler.handler"
-  runtime       = "nodejs18.x"
+  runtime       = "nodejs22.x"
 
-  filename         = data.archive_file.lambda_zip.output_path
-  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
+  filename         = data.archive_file_Post.lambda_zip_Post.output_path
+  source_code_hash = data.archive_file_Post.lambda_zip_Post.output_base64sha256
 }
 
 
