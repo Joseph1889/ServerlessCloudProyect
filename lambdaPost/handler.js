@@ -1,7 +1,11 @@
 exports.handler = async (event) => {
-  console.log("Evento recibido:", event);
+
   return {
     statusCode: 200,
-    body: JSON.stringify("Hola desde LambdaPost!"),
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ message: "Hola desde LambdaPost!" })
   };
 };
