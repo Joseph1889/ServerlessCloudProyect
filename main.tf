@@ -54,7 +54,7 @@ resource "aws_lambda_function" "mi_lambda_get" {
   function_name = "MiLambdaGet"
   role          = aws_iam_role.lambda_exec.arn
   handler       = "handler.handler"
-  runtime       = "nodejs22.x"
+  runtime       = "nodejs20.x"
 
   filename         = data.archive_file.lambda_zip_get.output_path
   source_code_hash = data.archive_file.lambda_zip_get.output_base64sha256
@@ -70,7 +70,7 @@ resource "aws_lambda_function" "mi_lambda_post" {
   function_name = "MiLambdaPost"
   role          = aws_iam_role.lambda_exec.arn
   handler       = "handler.handler"
-  runtime       = "nodejs22.x"
+  runtime       = "nodejs20.x"
 
   filename         = data.archive_file.lambda_zip_post.output_path
   source_code_hash = data.archive_file.lambda_zip_post.output_base64sha256
