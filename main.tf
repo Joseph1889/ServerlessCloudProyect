@@ -2,6 +2,16 @@ provider "aws" {
   region = "us-east-1"
 }
 
+resource "aws_s3_bucket" "tf_state" {
+  bucket = "mi-bucket-terraform-state-456789"
+  force_destroy = true
+
+  tags = {
+    Environment = "dev"
+    Project     = "MiProyecto"
+  }
+}
+
 resource "aws_dynamodb_table" "mi_tabla" {
 
   name         = "MiTablaDynamoDB"
