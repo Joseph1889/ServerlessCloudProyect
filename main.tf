@@ -50,7 +50,7 @@ data "archive_file" "lambda_zip_get" {
   output_path = "${path.module}/lambda_function_Get.zip"
 }
 
-resource "aws_lambda_function_Get" "mi_lambda_Get" {
+resource "aws_lambda_function" "mi_lambda_get" {
   function_name = "MiLambdaGet"
   role          = aws_iam_role.lambda_exec.arn
   handler       = "handler.handler"
@@ -66,7 +66,7 @@ data "archive_file" "lambda_zip_post" {
   output_path = "${path.module}/lambda_function_Post.zip"
 }
 
-resource "aws_lambda_function_Post" "mi_lambda_get" {
+resource "aws_lambda_function" "mi_lambda_post" {
   function_name = "MiLambdaPost"
   role          = aws_iam_role.lambda_exec.arn
   handler       = "handler.handler"
