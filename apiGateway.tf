@@ -8,6 +8,8 @@ resource "aws_api_gateway_rest_api" "my_api" {
   }
 }
 
+
+//Lambda permissions
 resource "aws_lambda_permission" "allow_apigw_post" {
   statement_id  = "AllowAPIGatewayInvokePost"
   action        = "lambda:InvokeFunction"
@@ -25,22 +27,23 @@ resource "aws_lambda_permission" "allow_apigw_get" {
 }
 
 
-// API Gateway recurso /mypath
+// API Gateway resource /mypath
 resource "aws_api_gateway_resource" "root" {
   rest_api_id = aws_api_gateway_rest_api.my_api.id
   parent_id   = aws_api_gateway_rest_api.my_api.root_resource_id
   path_part   = "mypath"
 }
 
-// Método POST
+
+// POST method
 resource "aws_api_gateway_method" "proxy_post" {
   rest_api_id = aws_api_gateway_rest_api.my_api.id
   resource_id = aws_api_gateway_resource.root.id
   http_method = "POST"
-  authorization = "NONE" // Cambiar a COGNITO_USER_POOLS si usas Cognito
+  authorization = "NONE"
 }
 
-// Integración Lambda POST
+// Lambda POST integration
 resource "aws_api_gateway_integration" "lambda_integration_post" {
   rest_api_id             = aws_api_gateway_rest_api.my_api.id
   resource_id             = aws_api_gateway_resource.root.id
@@ -50,25 +53,7 @@ resource "aws_api_gateway_integration" "lambda_integration_post" {
   uri                     = aws_lambda_function.mi_lambda_post.invoke_arn
 }
 
-// Método GET
-resource "aws_api_gateway_method" "proxy_get" {
-  rest_api_id = aws_api_gateway_rest_api.my_api.id
-  resource_id = aws_api_gateway_resource.root.id
-  http_method = "GET"
-  authorization = "NONE" // Cambiar a COGNITO_USER_POOLS si usas Cognito
-}
-
-// Integración Lambda GET
-resource "aws_api_gateway_integration" "lambda_integration_get" {
-  rest_api_id             = aws_api_gateway_rest_api.my_api.id
-  resource_id             = aws_api_gateway_resource.root.id
-  http_method             = aws_api_gateway_method.proxy_get.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  uri                     = aws_lambda_function.mi_lambda_get.invoke_arn
-}
-
-// Respuesta método POST
+// POST method response
 resource "aws_api_gateway_method_response" "proxy_post" {
   rest_api_id = aws_api_gateway_rest_api.my_api.id
   resource_id = aws_api_gateway_resource.root.id
@@ -98,7 +83,26 @@ resource "aws_api_gateway_integration_response" "proxy_post" {
   ]
 }
 
-// Respuesta método GET
+// GET method
+resource "aws_api_gateway_method" "proxy_get" {
+  rest_api_id = aws_api_gateway_rest_api.my_api.id
+  resource_id = aws_api_gateway_resource.root.id
+  http_method = "GET"
+  authorization = "NONE"
+}
+
+// Lambda GET integration
+resource "aws_api_gateway_integration" "lambda_integration_get" {
+  rest_api_id             = aws_api_gateway_rest_api.my_api.id
+  resource_id             = aws_api_gateway_resource.root.id
+  http_method             = aws_api_gateway_method.proxy_get.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.mi_lambda_get.invoke_arn
+}
+
+
+// GET method response
 resource "aws_api_gateway_method_response" "proxy_get" {
   rest_api_id = aws_api_gateway_rest_api.my_api.id
   resource_id = aws_api_gateway_resource.root.id
@@ -128,7 +132,8 @@ resource "aws_api_gateway_integration_response" "proxy_get" {
   ]
 }
 
-// Método OPTIONS para CORS
+
+// CORS method for OPTIONS
 resource "aws_api_gateway_method" "options" {
   rest_api_id = aws_api_gateway_rest_api.my_api.id
   resource_id = aws_api_gateway_resource.root.id
@@ -179,6 +184,7 @@ resource "aws_api_gateway_integration_response" "options_integration_response" {
   ]
 }
 
+
 // Deployment
 resource "aws_api_gateway_deployment" "deployment" {
   depends_on = [
@@ -193,7 +199,8 @@ resource "aws_api_gateway_deployment" "deployment" {
   }
 }
 
-// Stage
+
+// DEV Stage
 resource "aws_api_gateway_stage" "dev" {
   stage_name    = "dev"
   rest_api_id   = aws_api_gateway_rest_api.my_api.id
