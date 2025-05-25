@@ -1,4 +1,4 @@
-# Cloud Proyect 
+# Serverless Cloud Proyect 
 ## Proyect with Terraform-AWS-Github actions
 
 ![Arquitecture](./imgs/Arquitecture.png)
