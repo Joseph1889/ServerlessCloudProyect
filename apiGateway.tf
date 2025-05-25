@@ -140,7 +140,7 @@ resource "aws_api_gateway_integration" "options_integration" {
   rest_api_id             = aws_api_gateway_rest_api.my_api.id
   resource_id             = aws_api_gateway_resource.root.id
   http_method             = aws_api_gateway_method.options.http_method
-  integration_http_method = "OPTIONS"
+  //integration_http_method = "OPTIONS"
   type                    = "MOCK"
 
   request_templates = {
@@ -188,8 +188,8 @@ resource "aws_api_gateway_deployment" "deployment" {
 
   rest_api_id = aws_api_gateway_rest_api.my_api.id
 
-  triggers = {
-    redeploy = timestamp()
+  lifecycle {
+    ignore_changes = [triggers]
   }
 }
 
