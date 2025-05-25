@@ -1,4 +1,4 @@
-const DynamoDBClient = require("@aws-sdk/client-dynamodb");
+const {DynamoDBClient} = require("@aws-sdk/client-dynamodb");
 const { GetCommand, DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
 
 const client = new DynamoDBClient({});
