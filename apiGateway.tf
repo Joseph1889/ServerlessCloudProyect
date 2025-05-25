@@ -1,4 +1,4 @@
-// API Gateway
+// API Gateway REST API
 resource "aws_api_gateway_rest_api" "my_api" {
   name        = "mi-api"
   description = "My API Gateway"
@@ -8,98 +8,132 @@ resource "aws_api_gateway_rest_api" "my_api" {
   }
 }
 
-/*
-resource "aws_api_gateway_authorizer" "demo" {
-  name          = "my_apig_authorizer2"
-  rest_api_id   = aws_api_gateway_rest_api.my_api.id
-  type          = "COGNITO_USER_POOLS"
-  provider_arns = [aws_cognito_user_pool.pool.arn]
-}
-*/
-
-resource "aws_lambda_permission" "allow_apigw" {
-  statement_id  = "AllowAPIGatewayInvoke"
+resource "aws_lambda_permission" "allow_apigw_post" {
+  statement_id  = "AllowAPIGatewayInvokePost"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.mi_lambda_post.function_name
   principal     = "apigateway.amazonaws.com"
-
-  source_arn = "${aws_api_gateway_rest_api.my_api.execution_arn}/*/*"
+  source_arn    = "${aws_api_gateway_rest_api.my_api.execution_arn}/*/POST/mypath"
 }
 
+resource "aws_lambda_permission" "allow_apigw_get" {
+  statement_id  = "AllowAPIGatewayInvokeGet"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.mi_lambda_get.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.my_api.execution_arn}/*/GET/mypath"
+}
+
+
+// API Gateway recurso /mypath
 resource "aws_api_gateway_resource" "root" {
   rest_api_id = aws_api_gateway_rest_api.my_api.id
   parent_id   = aws_api_gateway_rest_api.my_api.root_resource_id
   path_part   = "mypath"
 }
 
-resource "aws_api_gateway_method" "proxy" {
+// Método POST
+resource "aws_api_gateway_method" "proxy_post" {
   rest_api_id = aws_api_gateway_rest_api.my_api.id
   resource_id = aws_api_gateway_resource.root.id
   http_method = "POST"
-
-  authorization = "NONE" // comment this out in cognito section
-
-  //authorization = "COGNITO_USER_POOLS"
-  //authorizer_id = aws_api_gateway_authorizer.demo.id
+  authorization = "NONE" // Cambiar a COGNITO_USER_POOLS si usas Cognito
 }
 
-resource "aws_api_gateway_integration" "lambda_integration" {
+// Integración Lambda POST
+resource "aws_api_gateway_integration" "lambda_integration_post" {
   rest_api_id             = aws_api_gateway_rest_api.my_api.id
   resource_id             = aws_api_gateway_resource.root.id
-  http_method             = aws_api_gateway_method.proxy.http_method
+  http_method             = aws_api_gateway_method.proxy_post.http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.mi_lambda_post.invoke_arn
 }
 
-resource "aws_api_gateway_method_response" "proxy" {
+// Método GET
+resource "aws_api_gateway_method" "proxy_get" {
   rest_api_id = aws_api_gateway_rest_api.my_api.id
   resource_id = aws_api_gateway_resource.root.id
-  http_method = aws_api_gateway_method.proxy.http_method
-  status_code = "200"
+  http_method = "GET"
+  authorization = "NONE" // Cambiar a COGNITO_USER_POOLS si usas Cognito
+}
 
-  //cors section
+// Integración Lambda GET
+resource "aws_api_gateway_integration" "lambda_integration_get" {
+  rest_api_id             = aws_api_gateway_rest_api.my_api.id
+  resource_id             = aws_api_gateway_resource.root.id
+  http_method             = aws_api_gateway_method.proxy_get.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.mi_lambda_get.invoke_arn
+}
+
+// Respuesta método POST
+resource "aws_api_gateway_method_response" "proxy_post" {
+  rest_api_id = aws_api_gateway_rest_api.my_api.id
+  resource_id = aws_api_gateway_resource.root.id
+  http_method = aws_api_gateway_method.proxy_post.http_method
+  status_code = "200"
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Headers" = true,
-    //"method.response.header.Access-Control-Allow-Methods" = true,
     "method.response.header.Access-Control-Allow-Origin"  = true
   }
-
-
 }
 
-resource "aws_api_gateway_integration_response" "proxy" {
+resource "aws_api_gateway_integration_response" "proxy_post" {
   rest_api_id = aws_api_gateway_rest_api.my_api.id
   resource_id = aws_api_gateway_resource.root.id
-  http_method = aws_api_gateway_method.proxy.http_method
-  status_code = aws_api_gateway_method_response.proxy.status_code
+  http_method = aws_api_gateway_method.proxy_post.http_method
+  status_code = aws_api_gateway_method_response.proxy_post.status_code
 
-
-  //cors
-  
   response_parameters = {
     "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
-    //"method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS,POST,PUT'",
     "method.response.header.Access-Control-Allow-Origin"  = "'*'"
   }
-  
 
   depends_on = [
-    aws_api_gateway_method.proxy,
-    aws_api_gateway_integration.lambda_integration
+    aws_api_gateway_method.proxy_post,
+    aws_api_gateway_integration.lambda_integration_post
   ]
 }
 
-//options
+// Respuesta método GET
+resource "aws_api_gateway_method_response" "proxy_get" {
+  rest_api_id = aws_api_gateway_rest_api.my_api.id
+  resource_id = aws_api_gateway_resource.root.id
+  http_method = aws_api_gateway_method.proxy_get.http_method
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = true,
+    "method.response.header.Access-Control-Allow-Origin"  = true
+  }
+}
+
+resource "aws_api_gateway_integration_response" "proxy_get" {
+  rest_api_id = aws_api_gateway_rest_api.my_api.id
+  resource_id = aws_api_gateway_resource.root.id
+  http_method = aws_api_gateway_method.proxy_get.http_method
+  status_code = aws_api_gateway_method_response.proxy_get.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
+  }
+
+  depends_on = [
+    aws_api_gateway_method.proxy_get,
+    aws_api_gateway_integration.lambda_integration_get
+  ]
+}
+
+// Método OPTIONS para CORS
 resource "aws_api_gateway_method" "options" {
   rest_api_id = aws_api_gateway_rest_api.my_api.id
   resource_id = aws_api_gateway_resource.root.id
   http_method = "OPTIONS"
   authorization = "NONE"
-
-  //authorization = "COGNITO_USER_POOLS"
-  //authorizer_id = aws_api_gateway_authorizer.demo.id
 }
 
 resource "aws_api_gateway_integration" "options_integration" {
@@ -108,6 +142,7 @@ resource "aws_api_gateway_integration" "options_integration" {
   http_method             = aws_api_gateway_method.options.http_method
   integration_http_method = "OPTIONS"
   type                    = "MOCK"
+
   request_templates = {
     "application/json" = "{\"statusCode\": 200}"
   }
@@ -144,18 +179,26 @@ resource "aws_api_gateway_integration_response" "options_integration_response" {
   ]
 }
 
-
+// Deployment
 resource "aws_api_gateway_deployment" "deployment" {
   depends_on = [
-    aws_api_gateway_integration.lambda_integration,
-    aws_api_gateway_integration.options_integration, 
+    aws_api_gateway_integration.lambda_integration_get,
+    aws_api_gateway_integration.lambda_integration_post
   ]
 
   rest_api_id = aws_api_gateway_rest_api.my_api.id
+
+  triggers = {
+    redeploy = timestamp()
+  }
 }
 
+// Stage
 resource "aws_api_gateway_stage" "dev" {
   stage_name    = "dev"
   rest_api_id   = aws_api_gateway_rest_api.my_api.id
   deployment_id = aws_api_gateway_deployment.deployment.id
+
+  depends_on = [aws_api_gateway_deployment.deployment]
 }
+
