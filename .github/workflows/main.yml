@@ -3,7 +3,8 @@ name: Terraform pipeline
 on: 
   push: 
     branches:
-      - [main, dev]
+      - main
+      - dev
 
 jobs:
   terraform:
