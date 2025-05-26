@@ -10,11 +10,11 @@ resource "aws_dynamodb_table" "mi_tabla" {
   read_capacity  = 5
   write_capacity = 5
 
-  hash_key     = "ID_Dron"
+  hash_key = "ID_Dron"
 
   attribute {
     name = "ID_Dron"
-    type = "S"  # "S" = String, "N" = Number, "B" = Binary
+    type = "S" # "S" = String, "N" = Number, "B" = Binary
   }
 
   tags = {
